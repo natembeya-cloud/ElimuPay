@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ElimuPay — School Fees, Collected and Reconciled Automatically</title>
+<meta name="description" content="ElimuPay connects to your school's existing M-Pesa Till or Paybill to reconcile fee payments automatically. Schools get a private dashboard after onboarding; parents pay and check balances with no account needed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --black:#1A1A1A;
+    --flag-black:#000000;
+    --red:#BE3A34;
+    --red-deep:#8F2B26;
+    --green:#046A38;
+    --green-deep:#034D29;
+    --white:#FFFFFF;
+    --bg:#F7F7F4;
+    --panel:#FFFFFF;
+    --line:#DEDCD5;
+    --line-soft:#EAE8E1;
+    --muted:#54585C;
+    --focus:#1D6FBF;
+    --font-scale: 1;
+    box-sizing:border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *,*::before,*::after{ box-sizing:inherit; }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --black:#F2F2EE; --bg:#12161A; --panel:#1A2027; --line:#2C333A; --line-soft:#242B32;
+      --muted:#B7BEC4; --green:#1E8A4E; --green-deep:#166B3C; --red:#D9564F; --red-deep:#B23F39;
+    }
+  }
+  html[data-theme="dark"]{
+    --black:#F2F2EE; --bg:#12161A; --panel:#1A2027; --line:#2C333A; --line-soft:#242B32;
+    --muted:#B7BEC4; --green:#1E8A4E; --green-deep:#166B3C; --red:#D9564F; --red-deep:#B23F39;
+  }
+
+  /* High contrast mode */
+  html.contrast{
+    --black:#000000; --bg:#FFFFFF; --panel:#FFFFFF; --line:#000000; --line-soft:#000000;
+    --muted:#000000; --green:#00521F; --green-deep:#003D17; --red:#A00000; --red-deep:#7A0000;
+  }
+  html.contrast body{ font-weight:500; }
+  html.contrast .btn, html.contrast input, html.contrast select, html.contrast textarea, html.contrast .panel, html.contrast table{ border-width:2px !important; }
+
+  html{ scroll-padding-top: 130px; -webkit-text-size-adjust:100%; font-size: calc(16px * var(--font-scale)); }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--black);
+    font-family:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:"Source Serif 4", Georgia, serif;
+    font-weight:600;
+    color:var(--black);
+    margin:0 0 0.5em 0;
+    line-height:1.22;
+  }
+  p{ margin:0 0 1em 0; }
+  a{ color:inherit; }
+  button{ font-family:inherit; }
+  :focus-visible{ outline: 3px solid var(--focus); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
+
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 24px; }
+
+  .skip-link{
+    position:absolute; left:-999px; top:auto;
+    background:var(--flag-black); color:#fff; padding:12px 18px; z-index:100;
+    text-decoration:none; font-size:0.9rem; font-weight:600;
+  }
+  .skip-link:focus{ left:16px; top:16px; }
+
+  /* Flag stripe */
+  .flag-stripe{ display:flex; height:6px; }
+  .flag-stripe span{ flex:1; }
+  .flag-stripe .s-black{ background:var(--flag-black); }
+  .flag-stripe .s-red{ background:var(--red); }
+  .flag-stripe .s-green{ background:var(--green); }
+
+  /* Accessibility toolbar */
+  .access-bar{ background:#111214; color:#E6E6E2; font-size:0.82rem; }
+  .access-bar .wrap{ display:flex; justify-content:space-between; align-items:center; padding:8px 24px; flex-wrap:wrap; gap:10px; }
+  .access-controls{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .access-controls button{
+    background:transparent; border:1px solid #4A4C4F; color:#E6E6E2;
+    padding:5px 10px; font-size:0.8rem; cursor:pointer;
+  }
+  .access-controls button:hover{ border-color:#fff; }
+  .access-controls button[aria-pressed="true"]{ background:#fff; color:#111; border-color:#fff; }
+
+  /* Header */
+  header.site-header{ background:var(--panel); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:40; }
+  .header-row{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; gap:16px; }
+  .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .brand-mark{ width:38px; height:38px; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-family:"Source Serif 4", serif; font-weight:700; font-size:1.1rem; flex-shrink:0; }
+  .brand-name{ font-family:"Source Serif 4", serif; font-weight:600; font-size:1.2rem; }
+  .brand-sub{ display:block; font-size:0.66rem; color:var(--muted); font-weight:500; }
+
+  nav.main-nav{ display:flex; align-items:center; gap:26px; }
+  nav.main-nav a{ text-decoration:none; color:var(--muted); font-size:0.94rem; font-weight:500; border-bottom:2px solid transparent; padding:6px 2px; }
+  nav.main-nav a:hover{ color:var(--black); border-bottom-color:var(--red); }
+
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 20px; font-size:0.94rem; font-weight:600; text-decoration:none; border:1px solid transparent; cursor:pointer; line-height:1; }
+  .btn-green{ background:var(--green); color:#fff; border-color:var(--green); }
+  .btn-green:hover{ background:var(--green-deep); border-color:var(--green-deep); }
+  .btn-red{ background:var(--red); color:#fff; border-color:var(--red); }
+  .btn-red:hover{ background:var(--red-deep); border-color:var(--red-deep); }
+  .btn-outline{ background:transparent; color:var(--black); border-color:var(--black); }
+  .btn-outline:hover{ background:var(--black); color:var(--bg); }
+  .btn-ghost{ background:transparent; color:var(--black); border-color:var(--line); }
+  .btn-ghost:hover{ border-color:var(--black); }
+  .btn-sm{ padding:7px 12px; font-size:0.82rem; }
+  .btn-block{ width:100%; }
+  .btn:disabled{ opacity:0.55; cursor:not-allowed; }
+
+  .nav-toggle{ display:none; background:none; border:1px solid var(--line); width:42px; height:42px; align-items:center; justify-content:center; cursor:pointer; }
+  .nav-toggle span, .nav-toggle span::before, .nav-toggle span::after{ display:block; width:20px; height:2px; background:var(--black); position:relative; content:""; }
+  .nav-toggle span::before{ position:absolute; top:-6px; }
+  .nav-toggle span::after{ position:absolute; top:6px; }
+
+  /* Hero */
+  .hero{ background:var(--panel); border-bottom:1px solid var(--line); }
+  .hero .wrap{ padding:56px 24px 48px; max-width:800px; text-align:left; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:0.82rem; color:var(--green-deep); border:1px solid var(--line); background:var(--line-soft); padding:6px 12px; margin-bottom:20px; }
+  .eyebrow::before{ content:""; width:7px; height:7px; background:var(--green); border-radius:50%; }
+  .hero h1{ font-size:clamp(1.9rem, 4vw, 2.6rem); max-width:18ch; }
+  .hero p.lede{ font-size:1.06rem; color:var(--muted); max-width:56ch; }
+  .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; }
+
+  /* Sections */
+  section{ padding:64px 0; border-bottom:1px solid var(--line); }
+  section.no-border{ border-bottom:none; }
+  section.tint{ background:var(--line-soft); }
+  .section-head{ max-width:640px; margin-bottom:36px; }
+  .kicker{ font-size:0.82rem; color:var(--green-deep); font-weight:600; margin-bottom:8px; }
+  .section-head h2{ font-size:clamp(1.4rem, 3vw, 1.9rem); }
+  .section-head p{ color:var(--muted); }
+
+  /* How it works */
+  .how-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; border-top:1px solid var(--line); border-left:1px solid var(--line); }
+  .how-step{ border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:22px 20px; background:var(--panel); }
+  .how-num{ font-family:"Source Serif 4", serif; font-size:1.3rem; font-weight:600; color:var(--green-deep); margin-bottom:8px; }
+  .how-step h4{ font-size:0.98rem; margin-bottom:4px; }
+  .how-step p{ font-size:0.9rem; color:var(--muted); margin:0; }
+
+  /* Panel shell used by dashboard & portal */
+  .panel{ background:var(--panel); border:1px solid var(--line); }
+
+  /* Admin dashboard */
+  .dash-shell{ border:1px solid var(--line); background:var(--panel); }
+  .dash-topbar{ background:var(--flag-black); color:#fff; padding:16px 22px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .dash-topbar h3{ color:#fff; margin:0; font-size:1.02rem; }
+  .dash-topbar span{ color:#C9C9C4; font-size:0.8rem; }
+
+  .tablist{ display:flex; flex-wrap:wrap; border-bottom:1px solid var(--line); background:var(--line-soft); }
+  .tablist button{ background:transparent; border:none; border-bottom:3px solid transparent; padding:13px 18px; font-size:0.9rem; font-weight:600; color:var(--muted); cursor:pointer; }
+  .tablist button:hover{ color:var(--black); }
+  .tablist button[aria-selected="true"]{ color:var(--green-deep); border-bottom-color:var(--green); background:var(--panel); }
+
+  .tabpanel{ padding:24px; }
+  .tabpanel[hidden]{ display:none; }
+
+  .stat-cards{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:24px; }
+  .stat-card{ background:var(--panel); padding:18px 20px; }
+  .stat-label{ font-size:0.76rem; color:var(--muted); margin-bottom:6px; }
+  .stat-value{ font-family:"Source Serif 4", serif; font-size:1.35rem; font-weight:600; }
+
+  .status-row{ display:flex; align-items:center; gap:12px; margin-bottom:12px; font-size:0.9rem; }
+  .status-row .lab{ width:120px; flex-shrink:0; color:var(--muted); }
+  .status-track{ flex:1; height:9px; background:var(--line-soft); position:relative; }
+  .status-fill{ height:100%; }
+  .status-row .val{ width:30px; text-align:right; font-weight:600; }
+
+  table.data-table{ width:100%; border-collapse:collapse; }
+  table.data-table th, table.data-table td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-soft); font-size:0.9rem; }
+  table.data-table th{ font-size:0.76rem; color:var(--muted); font-weight:600; text-transform:none; }
+  table.data-table td.num{ text-align:right; font-variant-numeric:tabular-nums; }
+  .tag{ display:inline-block; padding:3px 9px; font-size:0.74rem; font-weight:600; border:1px solid transparent; }
+  .tag-matched{ background:#E5F1E9; color:var(--green-deep); border-color:var(--green); }
+  .tag-unmatched{ background:#FBEAE9; color:var(--red-deep); border-color:var(--red); }
+  html.contrast .tag-matched{ background:#fff; }
+  html.contrast .tag-unmatched{ background:#fff; }
+
+  .two-col{ display:grid; grid-template-columns:1.3fr 1fr; gap:28px; }
+  .inline-form{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; align-items:flex-end; }
+  .inline-form .f{ display:flex; flex-direction:column; gap:5px; }
+  .inline-form label{ font-size:0.8rem; color:var(--muted); }
+  .inline-form input, .inline-form select{ padding:9px 10px; border:1px solid var(--line); background:var(--bg); color:var(--black); font-size:0.9rem; font-family:inherit; min-width:160px; }
+
+  .switch{ position:relative; display:inline-block; width:40px; height:22px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch .slider{ position:absolute; inset:0; background:var(--line); cursor:pointer; transition:background .15s; }
+  .switch .slider::before{ content:""; position:absolute; height:16px; width:16px; left:3px; top:3px; background:#fff; transition:transform .15s; }
+  .switch input:checked + .slider{ background:var(--green); }
+  .switch input:checked + .slider::before{ transform:translateX(18px); }
+  .switch input:focus-visible + .slider{ outline:3px solid var(--focus); outline-offset:2px; }
+
+  .reminder-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-soft); }
+  .reminder-row:last-child{ border-bottom:none; }
+  .reminder-row div p{ margin:0; font-size:0.82rem; color:var(--muted); }
+
+  .report-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-soft); }
+  .report-row:last-child{ border-bottom:none; }
+  .report-preview{ margin-top:16px; border:1px dashed var(--line); padding:16px; font-size:0.86rem; color:var(--muted); display:none; }
+  .report-preview.show{ display:block; }
+
+  /* Parent portal */
+  .portal-search{ max-width:480px; margin-bottom:8px; }
+  .portal-search label{ display:block; font-size:0.88rem; margin-bottom:6px; font-weight:600; }
+  .portal-search .row{ display:flex; gap:10px; }
+  .portal-search input{ flex:1; padding:11px 12px; border:1px solid var(--line); background:var(--bg); color:var(--black); font-size:0.95rem; font-family:inherit; }
+
+  .student-card{ border:1px solid var(--line); background:var(--panel); }
+  .student-card-head{ background:var(--green); color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; }
+  .student-card-head h4{ color:#fff; margin:0; font-size:1.05rem; }
+  .student-card-head span{ font-size:0.82rem; color:#DDEFE3; }
+  .student-body{ padding:20px; }
+  .student-figures{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:20px; }
+  .student-figures div{ background:var(--panel); padding:14px 16px; }
+  .student-figures .lab{ font-size:0.74rem; color:var(--muted); margin-bottom:4px; }
+  .student-figures .val{ font-family:"Source Serif 4", serif; font-size:1.15rem; font-weight:600; }
+  .student-figures .val.owe{ color:var(--red-deep); }
+  .history-title{ font-size:0.82rem; color:var(--muted); font-weight:600; margin-bottom:10px; }
+
+  .error-note{ border:1px solid var(--red); background:#FBEAE9; color:var(--red-deep); padding:12px 16px; font-size:0.9rem; max-width:480px; }
+  html.contrast .error-note{ background:#fff; }
+  .success-note{ border:1px solid var(--green); background:#E5F1E9; color:var(--green-deep); padding:12px 16px; font-size:0.9rem; max-width:520px; }
+  html.contrast .success-note{ background:#fff; }
+
+  /* Role cards */
+  .role-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .role-card{ background:var(--panel); padding:28px 26px; }
+  .role-card .role-kicker{ font-size:0.72rem; letter-spacing:0.04em; text-transform:uppercase; color:var(--green-deep); font-weight:700; margin-bottom:8px; }
+  .role-card h3{ font-size:1.1rem; margin-bottom:10px; }
+  .role-card ul{ list-style:none; margin:0; padding:0; }
+  .role-card li{ font-size:0.9rem; color:var(--muted); padding:7px 0 7px 18px; border-top:1px solid var(--line-soft); position:relative; }
+  .role-card li:first-child{ border-top:none; }
+  .role-card li::before{ content:"–"; position:absolute; left:0; color:var(--green); }
+
+  /* Login card */
+  .login-card{ border:1px solid var(--line); background:var(--panel); padding:26px; max-width:420px; }
+  .login-card h3{ font-size:1.05rem; margin-bottom:4px; }
+  .login-card p.hint{ color:var(--muted); font-size:0.86rem; margin-bottom:18px; }
+  .login-card .form-row{ margin-bottom:14px; }
+  .login-card label{ display:block; font-size:0.85rem; margin-bottom:6px; color:var(--muted); }
+  .login-card input{ width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--bg); color:var(--black); font-size:0.95rem; font-family:inherit; }
+  .login-card .switch-link{ margin-top:14px; font-size:0.85rem; color:var(--muted); text-align:center; }
+  .login-card .switch-link a{ color:var(--green-deep); font-weight:600; text-decoration:none; cursor:pointer; }
+  .login-card .switch-link a:hover{ text-decoration:underline; }
+
+  .session-bar{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:14px 20px; background:var(--line-soft); border:1px solid var(--line); border-bottom:none; }
+  .session-bar span{ font-size:0.88rem; }
+  .session-bar strong{ font-weight:600; }
+
+  .lead-form{ border:1px solid var(--line); background:var(--panel); padding:26px; }
+  .lead-form .two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .lead-form .form-row{ margin-bottom:14px; }
+  .lead-form label{ display:block; font-size:0.85rem; margin-bottom:6px; color:var(--muted); }
+  .lead-form input, .lead-form select, .lead-form textarea{ width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--bg); color:var(--black); font-size:0.95rem; font-family:inherit; }
+  .lead-form textarea{ min-height:80px; resize:vertical; }
+
+  /* Platform admin (superadmin) */
+  .platform-note{ border:1px solid var(--gold, var(--line)); background:var(--line-soft); padding:14px 16px; font-size:0.86rem; color:var(--muted); margin-bottom:22px; }
+  .badge{ display:inline-block; padding:3px 10px; font-size:0.72rem; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; border:1px solid transparent; }
+  .badge-active{ background:#E5F1E9; color:var(--green-deep); border-color:var(--green); }
+  .badge-suspended{ background:#FBEAE9; color:var(--red-deep); border-color:var(--red); }
+  html.contrast .badge-active, html.contrast .badge-suspended{ background:#fff; }
+
+  .super-tablist{ display:flex; flex-wrap:wrap; border-bottom:1px solid var(--line); background:var(--line-soft); }
+  .super-tablist button{ background:transparent; border:none; border-bottom:3px solid transparent; padding:13px 18px; font-size:0.9rem; font-weight:600; color:var(--muted); cursor:pointer; }
+  .super-tablist button:hover{ color:var(--black); }
+  .super-tablist button[aria-selected="true"]{ color:var(--red-deep); border-bottom-color:var(--red); background:var(--panel); }
+
+  .school-row-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .add-school-form{ border:1px solid var(--line); background:var(--bg); padding:20px; margin-bottom:24px; }
+  .add-school-form .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .add-school-form label{ display:block; font-size:0.82rem; color:var(--muted); margin-bottom:5px; }
+  .add-school-form input, .add-school-form select{ width:100%; padding:9px 10px; border:1px solid var(--line); background:var(--panel); color:var(--black); font-size:0.9rem; font-family:inherit; }
+  .credential-box{ border:1px solid var(--green); background:#E5F1E9; color:var(--green-deep); padding:14px 16px; font-size:0.88rem; margin-top:14px; }
+  html.contrast .credential-box{ background:#fff; }
+  .credential-box code{ background:rgba(0,0,0,0.06); padding:2px 6px; font-weight:600; }
+
+  .version-row{ display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-soft); font-size:0.9rem; }
+  .version-row:last-child{ border-bottom:none; }
+  .version-row .v-num{ font-weight:700; color:var(--green-deep); min-width:70px; }
+  .version-row .v-notes{ color:var(--muted); flex:1; }
+  .version-row .v-date{ color:var(--muted); font-size:0.8rem; white-space:nowrap; }
+
+  /* Parent search flow */
+  .school-picker-results{ display:flex; flex-direction:column; gap:8px; max-width:480px; margin-top:10px; }
+  .school-picker-results button{ text-align:left; padding:12px 14px; border:1px solid var(--line); background:var(--panel); cursor:pointer; font-family:inherit; font-size:0.92rem; color:var(--black); }
+  .school-picker-results button:hover{ border-color:var(--green); background:var(--line-soft); }
+  .chosen-school-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; max-width:520px; padding:12px 16px; border:1px solid var(--green); background:#E5F1E9; margin-top:10px; }
+  html.contrast .chosen-school-bar{ background:#fff; }
+  .chosen-school-bar span{ font-size:0.9rem; font-weight:600; }
+  .chosen-school-bar button{ background:none; border:none; color:var(--green-deep); font-weight:600; font-size:0.85rem; cursor:pointer; text-decoration:underline; }
+
+  .child-search-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; max-width:640px; margin-top:16px; align-items:end; }
+  .child-search-grid .f{ display:flex; flex-direction:column; gap:6px; }
+  .child-search-grid label{ font-size:0.82rem; color:var(--muted); }
+  .child-search-grid label .opt{ font-weight:400; color:var(--muted); }
+  .child-search-grid input{ padding:10px 12px; border:1px solid var(--line); background:var(--bg); color:var(--black); font-size:0.92rem; font-family:inherit; }
+
+  .search-results-list{ display:flex; flex-direction:column; gap:8px; max-width:560px; margin-top:16px; }
+  .search-results-list button{ display:flex; justify-content:space-between; gap:10px; text-align:left; padding:12px 14px; border:1px solid var(--line); background:var(--panel); cursor:pointer; font-family:inherit; font-size:0.9rem; color:var(--black); }
+  .search-results-list button:hover{ border-color:var(--green); background:var(--line-soft); }
+  .search-results-list button span.adm{ color:var(--muted); font-size:0.85rem; }
+
+  @media (max-width:880px){
+    .role-grid{ grid-template-columns:1fr; }
+    .add-school-form .grid{ grid-template-columns:1fr; }
+    .child-search-grid{ grid-template-columns:1fr; }
+  }
+
+  /* Pay modal */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; padding:20px; z-index:80; }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{ background:var(--panel); border:1px solid var(--line); max-width:420px; width:100%; padding:24px; }
+  .modal-box h4{ margin-bottom:6px; }
+  .modal-box p{ color:var(--muted); font-size:0.9rem; }
+  .modal-field{ margin:16px 0; }
+  .modal-field label{ display:block; font-size:0.85rem; margin-bottom:6px; }
+  .modal-field input{ width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--bg); color:var(--black); font-family:inherit; font-size:0.95rem; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:6px; }
+  .modal-status{ margin-top:14px; font-size:0.88rem; padding:10px 12px; border:1px solid var(--green); background:#E5F1E9; color:var(--green-deep); display:none; }
+  .modal-status.show{ display:block; }
+  html.contrast .modal-status{ background:#fff; }
+
+  /* Features */
+  .feature-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .feature-cell{ background:var(--panel); padding:26px 24px; }
+  .feature-cell h3{ font-size:1.05rem; margin-bottom:8px; }
+  .feature-cell p{ color:var(--muted); font-size:0.92rem; margin:0; }
+
+  /* Accessibility statement */
+  .a11y-list{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:10px 28px; }
+  .a11y-list li{ font-size:0.94rem; color:var(--muted); padding-left:20px; position:relative; }
+  .a11y-list li::before{ content:"✓"; position:absolute; left:0; color:var(--green); font-weight:700; }
+
+  /* Contact / footer */
+  .contact-items{ display:flex; flex-direction:column; gap:16px; max-width:420px; }
+  .contact-item{ display:flex; gap:12px; }
+  .contact-icon{ width:36px; height:36px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0; background:var(--panel); }
+  .contact-item h4{ margin:0 0 2px 0; font-size:0.96rem; }
+  .contact-item p{ margin:0; color:var(--muted); font-size:0.88rem; }
+
+  footer.site-footer{ background:var(--flag-black); color:#D8D8D3; }
+  .footer-row{ padding:28px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:0.84rem; }
+  .footer-row a{ color:#D8D8D3; text-decoration:none; margin-left:16px; }
+  .footer-row a:hover{ color:#fff; text-decoration:underline; }
+
+  @media (max-width:880px){
+    nav.main-nav{ position:fixed; inset:64px 0 0 0; background:var(--panel); flex-direction:column; align-items:flex-start; padding:20px 24px; gap:2px; overflow-y:auto; transform:translateY(-8px); opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease; }
+    nav.main-nav.open{ opacity:1; pointer-events:auto; transform:none; }
+    nav.main-nav a{ width:100%; padding:14px 4px; border-bottom:1px solid var(--line-soft); }
+    .nav-toggle{ display:flex; }
+    .header-actions .btn-outline{ display:none; }
+    .how-grid{ grid-template-columns:1fr 1fr; }
+    .stat-cards{ grid-template-columns:1fr 1fr; }
+    .two-col{ grid-template-columns:1fr; }
+    .feature-grid{ grid-template-columns:1fr; }
+    .a11y-list{ grid-template-columns:1fr; }
+    .student-figures{ grid-template-columns:1fr; }
+    .access-bar .wrap{ justify-content:center; text-align:center; }
+  }
+  @media (max-width:560px){
+    .how-grid{ grid-template-columns:1fr; }
+    .stat-cards{ grid-template-columns:1fr 1fr; }
+    .tablist{ overflow-x:auto; flex-wrap:nowrap; }
+    .tablist button{ white-space:nowrap; }
+    .inline-form input, .inline-form select{ min-width:120px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="flag-stripe"><span class="s-black"></span><span class="s-red"></span><span class="s-green"></span></div>
+
+<div class="access-bar">
+  <div class="wrap">
+    <span>ElimuPay is built to Kenyan accessibility standards</span>
+    <div class="access-controls" role="group" aria-label="Accessibility controls">
+      <button type="button" id="fontDec" aria-label="Decrease text size">A−</button>
+      <button type="button" id="fontReset" aria-label="Reset text size">A</button>
+      <button type="button" id="fontInc" aria-label="Increase text size">A+</button>
+      <button type="button" id="contrastToggle" aria-pressed="false">High contrast</button>
+    </div>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="#top">
+      <span class="brand-mark">E</span>
+      <span><span class="brand-name">ElimuPay</span><span class="brand-sub">School fees, automatically reconciled</span></span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="#how-it-works">How it works</a>
+      <a href="#schools">For schools</a>
+      <a href="#parents">For parents</a>
+      <a href="#accessibility">Accessibility</a>
+      <a href="#contact">Contact</a>
+      <a href="#platform-admin" style="opacity:0.6; font-size:0.85rem;">Platform admin</a>
+    </nav>
+    <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
+      <a href="#schools" class="btn btn-outline">School sign in</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero no-border" id="top">
+    <div class="wrap">
+      <span class="eyebrow">Now onboarding schools in Bungoma County</span>
+      <h1>School fees, collected and reconciled automatically.</h1>
+      <p class="lede">ElimuPay is a simple, mobile-first way for small and medium-sized private schools in Kenya to manage fees — without black books, spreadsheets, M-Pesa messages or constant phone calls to parents. It connects to the school's existing M-Pesa Till or Paybill and automatically records and reconciles every payment against the right student, whether a parent pays KSh 200 or KSh 5,000.</p>
+      <div class="hero-ctas">
+        <a href="#schools" class="btn btn-green">Request access for your school</a>
+        <a href="#parents" class="btn btn-red">Pay or check a balance</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="tint" id="how-it-works" aria-labelledby="how-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">How it works</div>
+        <h2 id="how-heading">Four steps, no black book</h2>
+      </div>
+      <div class="how-grid">
+        <div class="how-step"><div class="how-num">1</div><h4>Parent pays</h4><p>Through the school's existing M-Pesa Till or Paybill — nothing new to set up.</p></div>
+        <div class="how-step"><div class="how-num">2</div><h4>ElimuPay reconciles</h4><p>The payment is matched to the correct student automatically.</p></div>
+        <div class="how-step"><div class="how-num">3</div><h4>Balance updates</h4><p>The student's paid and outstanding amounts recalculate instantly.</p></div>
+        <div class="how-step"><div class="how-num">4</div><h4>Everyone is informed</h4><p>The parent gets an instant confirmation; the school's dashboard updates.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROLES -->
+  <section aria-labelledby="roles-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Two simple roles</div>
+        <h2 id="roles-heading">Everyone sees only what they need</h2>
+        <p>ElimuPay isn't one crowded app — it's a private dashboard for the school and a simple pay-and-check page for parents.</p>
+      </div>
+      <div class="role-grid">
+        <div class="role-card">
+          <div class="role-kicker">School administrators</div>
+          <h3>A private dashboard, once onboarded</h3>
+          <ul>
+            <li>Upload student records and their parents' contact details</li>
+            <li>Verify payments received on your designated Paybill or Till</li>
+            <li>See balances, collections and outstanding fees in real time</li>
+            <li>Send fee reminders and generate statements and reports</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <div class="role-kicker">Parents</div>
+          <h3>No app, no account, no cost</h3>
+          <ul>
+            <li>Look up a balance with a student's admission number</li>
+            <li>Pay any amount, any time, through the same M-Pesa channel</li>
+            <li>Get an instant confirmation after every payment</li>
+            <li>Never asked to pay anything extra to use ElimuPay</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOR SCHOOLS -->
+  <section id="schools" class="tint" aria-labelledby="schools-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">For school administrators</div>
+        <h2 id="schools-heading">Your school's dashboard, activated after onboarding</h2>
+        <p>Once your school agrees to come on board, we set up your account against your designated M-Pesa Paybill or Till and hand your administrator a private sign-in. From there, the dashboard is yours: upload your students and their parents, and verify incoming payments as they arrive.</p>
+      </div>
+
+      <div class="two-col" style="align-items:start;">
+        <div id="adminAccessArea">
+          <!-- Login card or dashboard is rendered here by script -->
+        </div>
+
+        <div>
+          <div class="login-card" style="max-width:none;">
+            <h3>Not onboarded yet?</h3>
+            <p class="hint">Tell us about your school and we'll be in touch to arrange onboarding and activate your dashboard.</p>
+            <form class="lead-form" id="leadForm" style="padding:0; border:none; background:transparent;">
+              <div class="two" style="margin-bottom:14px;">
+                <div class="form-row"><label for="leadName">Your name</label><input type="text" id="leadName" required></div>
+                <div class="form-row"><label for="leadSchool">School name</label><input type="text" id="leadSchool" required></div>
+              </div>
+              <div class="two" style="margin-bottom:14px;">
+                <div class="form-row"><label for="leadPhone">Phone number</label><input type="tel" id="leadPhone" required></div>
+                <div class="form-row"><label for="leadStudents">Number of students</label>
+                  <select id="leadStudents">
+                    <option>Up to 100</option>
+                    <option>101–300</option>
+                    <option>301–600</option>
+                    <option>600+</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row"><label for="leadEmail">Email (optional)</label><input type="email" id="leadEmail"></div>
+              <div class="form-row"><label for="leadMessage">Anything we should know?</label><textarea id="leadMessage" placeholder="e.g. which M-Pesa Paybill or Till you currently use"></textarea></div>
+              <button type="submit" class="btn btn-green btn-block">Request access</button>
+              <div class="success-note" id="leadSuccess" style="display:none; margin-top:14px;"></div>
+              <div class="error-note" id="leadError" style="display:none; margin-top:14px;"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARENT PORTAL -->
+  <section id="parents" class="tint" aria-labelledby="parents-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">For parents</div>
+        <h2 id="parents-heading">Pay fees and check a balance</h2>
+        <p>Find your school, then find your child by name, grade or admission number — whichever you have to hand. No app, no account, no charge to you.</p>
+      </div>
+
+      <!-- Step 1: find the school -->
+      <div id="schoolPickerStep">
+        <div class="portal-search">
+          <label for="schoolSearchInput">Your child's school</label>
+          <div class="row">
+            <input type="text" id="schoolSearchInput" placeholder="Start typing your school's name" autocomplete="off">
+            <button type="button" class="btn btn-green" id="schoolSearchBtn">Find school</button>
+          </div>
+        </div>
+        <div id="schoolPickerResults"></div>
+      </div>
+
+      <!-- Step 2: find the child (hidden until a school is chosen) -->
+      <div id="childSearchStep" style="display:none;">
+        <div class="chosen-school-bar">
+          <span id="chosenSchoolName"></span>
+          <button type="button" id="changeSchoolBtn">Change school</button>
+        </div>
+
+        <div class="child-search-grid">
+          <div class="f"><label for="childName">Child's name</label><input type="text" id="childName" placeholder="e.g. Brian" autocomplete="off"></div>
+          <div class="f"><label for="childClass">Grade / class <span class="opt">(optional)</span></label><input type="text" id="childClass" placeholder="e.g. Class 3" autocomplete="off"></div>
+          <div class="f"><label for="childAdmission">Admission no. <span class="opt">(optional — fastest match)</span></label><input type="text" id="childAdmission" placeholder="e.g. BHA-014" autocomplete="off"></div>
+        </div>
+        <div style="margin-top:14px;">
+          <button type="button" class="btn btn-green" id="childSearchBtn">Search</button>
+        </div>
+      </div>
+
+      <div id="portalResult" aria-live="polite" style="margin-top:20px;"></div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" aria-labelledby="features-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Why schools choose ElimuPay</div>
+        <h2 id="features-heading">Faster, simpler, more transparent fee collection</h2>
+        <p>ElimuPay's goal isn't to become another M-Pesa provider or to hold school funds — it's to remove the manual work around payments you already receive.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-cell"><h3>Your own payment channel</h3><p>Money still goes straight to your school's own M-Pesa Paybill or Till, exactly as it does today.</p></div>
+        <div class="feature-cell"><h3>Automatic reconciliation</h3><p>Every payment is matched to a student and reflected in their balance without manual entry.</p></div>
+        <div class="feature-cell"><h3>Parent notifications</h3><p>Instant confirmations after every payment, and balance reminders on a schedule the school controls.</p></div>
+        <div class="feature-cell"><h3>Reports on demand</h3><p>Professional fee statements and collection reports, ready without going through paper records.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACCESSIBILITY -->
+  <section id="accessibility" class="tint" aria-labelledby="a11y-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Accessibility</div>
+        <h2 id="a11y-heading">Built to be usable by everyone</h2>
+        <p>Administrators and parents use ElimuPay on a range of devices and abilities. These controls and choices are built into the site, not added after the fact.</p>
+      </div>
+      <ul class="a11y-list">
+        <li>Skip-to-content link for keyboard and screen reader users</li>
+        <li>Adjustable text size, saved for your next visit</li>
+        <li>High-contrast mode for low-vision users</li>
+        <li>Full keyboard navigation, including the dashboard tabs</li>
+        <li>Visible focus outlines on every interactive element</li>
+        <li>Labels on every form field, not placeholder text alone</li>
+        <li>Status messages announced to screen readers</li>
+        <li>Reduced motion respected for those who prefer it</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PLATFORM ADMIN (superadmin) -->
+  <section id="platform-admin" aria-labelledby="platform-admin-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">For the ElimuPay team</div>
+        <h2 id="platform-admin-heading">Platform administration</h2>
+        <p>Not for schools or parents — this is where ElimuPay itself grants and removes school access, reviews onboarding requests, and manages what version of the site is live.</p>
+      </div>
+      <div id="superAdminArea"></div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="no-border" aria-labelledby="contact-heading">
+    <div class="wrap two-col">
+      <div>
+        <div class="kicker">Get in touch</div>
+        <h2 id="contact-heading">Bring ElimuPay to your school</h2>
+        <p>We're onboarding a small number of pilot schools in Bungoma County. Reach us directly, or use the request form above, to arrange onboarding for your school.</p>
+      </div>
+      <div class="contact-items">
+        <div class="contact-item"><div class="contact-icon" aria-hidden="true">✉</div><div><h4>Email</h4><p>hello@elimupay.co.ke</p></div></div>
+        <div class="contact-item"><div class="contact-icon" aria-hidden="true">☎</div><div><h4>Phone</h4><p>+254 700 000 000</p></div></div>
+        <div class="contact-item"><div class="contact-icon" aria-hidden="true">◎</div><div><h4>Based in</h4><p>Bungoma, Kenya</p></div></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <span>© 2026 ElimuPay. Funds are always received directly into the school's own M-Pesa account.</span>
+    <span><a href="#accessibility">Accessibility</a><a href="#contact">Contact</a></span>
+  </div>
+</footer>
+
+<!-- Pay modal -->
+<div class="modal-overlay" id="payModal" role="dialog" aria-modal="true" aria-labelledby="payModalTitle">
+  <div class="modal-box">
+    <h4 id="payModalTitle">Pay via M-Pesa</h4>
+    <p id="payModalSub">Enter the phone number to receive the payment prompt.</p>
+    <div class="modal-field">
+      <label for="payPhone">M-Pesa phone number</label>
+      <input type="tel" id="payPhone" placeholder="07XX XXX XXX">
+    </div>
+    <div class="modal-field">
+      <label for="payAmount">Amount (KSh)</label>
+      <input type="number" id="payAmount" min="1" step="50">
+    </div>
+    <div class="modal-status" id="payStatus" aria-live="polite"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost btn-sm" id="payCancel">Cancel</button>
+      <button type="button" class="btn btn-green btn-sm" id="payConfirm">Send payment request</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* Mobile nav */
+  (function(){
+    var toggle = document.getElementById('navToggle');
+    var nav = document.getElementById('mainNav');
+    toggle.addEventListener('click', function(){
+      var open = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    nav.querySelectorAll('a').forEach(function(a){
+      a.addEventListener('click', function(){ nav.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); });
+    });
+  })();
+
+  /* Font size controls */
+  (function(){
+    var root = document.documentElement;
+    var scales = [0.9, 1, 1.15, 1.3];
+    var idx = 1;
+    try{
+      var saved = localStorage.getItem('elimupay-font-idx');
+      if(saved !== null){ idx = parseInt(saved,10); }
+    }catch(e){}
+    function apply(){
+      root.style.setProperty('--font-scale', scales[idx]);
+      try{ localStorage.setItem('elimupay-font-idx', idx); }catch(e){}
+    }
+    apply();
+    document.getElementById('fontInc').addEventListener('click', function(){ idx = Math.min(scales.length-1, idx+1); apply(); });
+    document.getElementById('fontDec').addEventListener('click', function(){ idx = Math.max(0, idx-1); apply(); });
+    document.getElementById('fontReset').addEventListener('click', function(){ idx = 1; apply(); });
+  })();
+
+  /* High contrast toggle */
+  (function(){
+    var root = document.documentElement;
+    var btn = document.getElementById('contrastToggle');
+    var on = false;
+    try{ on = localStorage.getItem('elimupay-contrast') === '1'; }catch(e){}
+    function apply(){
+      root.classList.toggle('contrast', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      try{ localStorage.setItem('elimupay-contrast', on ? '1' : '0'); }catch(e){}
+    }
+    apply();
+    btn.addEventListener('click', function(){ on = !on; apply(); });
+  })();
+
+  /* ==========================================================
+     Backend connection
+     ==========================================================
+     Change API_BASE_URL to wherever backend/ is deployed — see
+     README.md "Connecting the frontend". There is no offline or
+     demo mode: if the API can't be reached, the page says so. */
+  var API_BASE_URL = "http://localhost:4000/api";
+  var currentAdminSchoolId = null;   // set on school-admin login/boot
+  var currentParentSchoolId = null;  // set when a parent picks their school
+  var SUPER_TOKEN_KEY = 'elimupay_super_token';
+  var TOKEN_KEY = 'elimupay_token';
+
+  function fmtKsh(n){ return 'KSh ' + Math.round(n || 0).toLocaleString('en-KE'); }
+  function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+  function getToken(){ try{ return localStorage.getItem(TOKEN_KEY); }catch(e){ return null; } }
+  function setToken(t){ try{ if(t){ localStorage.setItem(TOKEN_KEY, t); } else { localStorage.removeItem(TOKEN_KEY); } }catch(e){} }
+  function setSession(schoolId, schoolName, adminName){
+    try{
+      if(schoolId != null){ localStorage.setItem('elimupay_school_id', String(schoolId)); }
+      if(schoolName){ localStorage.setItem('elimupay_school_name', schoolName); }
+      if(adminName){ localStorage.setItem('elimupay_admin_name', adminName); }
+      if(schoolId == null && !schoolName && !adminName){
+        localStorage.removeItem('elimupay_school_id');
+        localStorage.removeItem('elimupay_school_name');
+        localStorage.removeItem('elimupay_admin_name');
+      }
+    }catch(e){}
+  }
+  function getSession(){
+    try{
+      return {
+        schoolId: localStorage.getItem('elimupay_school_id'),
+        schoolName: localStorage.getItem('elimupay_school_name') || 'Your school',
+        adminName: localStorage.getItem('elimupay_admin_name') || 'Administrator'
+      };
+    }catch(e){ return { schoolId:null, schoolName:'Your school', adminName:'Administrator' }; }
+  }
+
+  function api(path, options, auth){
+    var headers = { 'Content-Type': 'application/json' };
+    if(auth){
+      var token = getToken();
+      if(token) headers['Authorization'] = 'Bearer ' + token;
+    }
+    return fetch(API_BASE_URL + path, Object.assign({ headers: headers }, options))
+      .then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(body){
+          if(!res.ok){
+            var err = new Error(body.error || ('Request failed (' + res.status + ')'));
+            err.status = res.status;
+            throw err;
+          }
+          return body;
+        });
+      })
+      .catch(function(err){
+        if(err.status === 401 && auth){
+          setToken(null);
+          setSession(null, null, null);
+          showLogin('Your session has expired. Please sign in again.');
+        }
+        if(err.status) throw err;
+        var networkErr = new Error("We couldn't reach the ElimuPay service. Check your connection and try again.");
+        networkErr.status = 0;
+        throw networkErr;
+      });
+  }
+
+  /* ---------------------------- Admin area --------------------------- */
+  var adminArea = document.getElementById('adminAccessArea');
+
+  var LOGIN_TEMPLATE =
+    '<div class="login-card">' +
+      '<h3>Sign in to your dashboard</h3>' +
+      '<p class="hint">For administrators of schools that have completed onboarding.</p>' +
+      '<form id="loginForm">' +
+        '<div class="form-row"><label for="loginEmail">Email</label><input type="email" id="loginEmail" required autocomplete="username"></div>' +
+        '<div class="form-row"><label for="loginPassword">Password</label><input type="password" id="loginPassword" required autocomplete="current-password"></div>' +
+        '<div class="error-note" id="loginError" style="display:none; margin-bottom:14px;"></div>' +
+        '<button type="submit" class="btn btn-green btn-block">Sign in</button>' +
+      '</form>' +
+      '<p class="switch-link">Not onboarded yet? Use the form to request access →</p>' +
+    '</div>';
+
+  function dashboardTemplate(schoolName, adminName){
+    return (
+    '<div class="session-bar">' +
+      '<span>Signed in as <strong>' + escapeHtml(adminName) + '</strong> — ' + escapeHtml(schoolName) + '</span>' +
+      '<button type="button" class="btn btn-ghost btn-sm" id="logoutBtn">Sign out</button>' +
+    '</div>' +
+    '<div class="dash-shell" style="border-top:none;">' +
+      '<div class="tablist" role="tablist" aria-label="Admin dashboard sections">' +
+        '<button role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>' +
+        '<button role="tab" id="tab-students" aria-controls="panel-students" aria-selected="false" tabindex="-1">Students</button>' +
+        '<button role="tab" id="tab-payments" aria-controls="panel-payments" aria-selected="false" tabindex="-1">Payments</button>' +
+        '<button role="tab" id="tab-reports" aria-controls="panel-reports" aria-selected="false" tabindex="-1">Reports</button>' +
+        '<button role="tab" id="tab-reminders" aria-controls="panel-reminders" aria-selected="false" tabindex="-1">Reminders</button>' +
+      '</div>' +
+
+      '<div class="tabpanel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="0">' +
+        '<div class="stat-cards">' +
+          '<div class="stat-card"><div class="stat-label">Expected fees</div><div class="stat-value" id="statExpected">—</div></div>' +
+          '<div class="stat-card"><div class="stat-label">Collected</div><div class="stat-value" id="statCollected">—</div></div>' +
+          '<div class="stat-card"><div class="stat-label">Outstanding</div><div class="stat-value" id="statOutstanding">—</div></div>' +
+          '<div class="stat-card"><div class="stat-label">Today\'s collection</div><div class="stat-value" id="statToday">—</div></div>' +
+        '</div>' +
+        '<div class="two-col">' +
+          '<div>' +
+            '<h4 style="font-size:0.95rem;" id="feeStatusHeading">Fee status</h4>' +
+            '<div class="status-row"><span class="lab">Fully paid</span><span class="status-track"><span class="status-fill" id="fillFullyPaid" style="width:0%; background:var(--green);"></span></span><span class="val" id="valFullyPaid">0</span></div>' +
+            '<div class="status-row"><span class="lab">Partial payment</span><span class="status-track"><span class="status-fill" id="fillPartial" style="width:0%; background:#B8860B;"></span></span><span class="val" id="valPartial">0</span></div>' +
+            '<div class="status-row"><span class="lab">Outstanding</span><span class="status-track"><span class="status-fill" id="fillOutstanding" style="width:0%; background:var(--red);"></span></span><span class="val" id="valOutstanding">0</span></div>' +
+          '</div>' +
+          '<div>' +
+            '<h4 style="font-size:0.95rem;">Recent payments</h4>' +
+            '<table class="data-table"><tbody id="recentPaymentsBody"><tr><td colspan="2">Loading…</td></tr></tbody></table>' +
+          '</div>' +
+        '</div>' +
+        '<div class="error-note" id="overviewError" style="display:none; margin-top:16px;"></div>' +
+      '</div>' +
+
+      '<div class="tabpanel" id="panel-students" role="tabpanel" aria-labelledby="tab-students" tabindex="0" hidden>' +
+        '<form class="inline-form" id="addStudentForm">' +
+          '<div class="f"><label for="stuName">Student name</label><input type="text" id="stuName" required></div>' +
+          '<div class="f"><label for="stuClass">Class</label><input type="text" id="stuClass" placeholder="e.g. Class 5" required></div>' +
+          '<div class="f"><label for="stuAdm">Admission no.</label><input type="text" id="stuAdm" placeholder="e.g. BHA-041" required></div>' +
+          '<div class="f"><label for="stuPhone">Parent phone</label><input type="tel" id="stuPhone" placeholder="2547XXXXXXXX"></div>' +
+          '<div class="f"><label for="stuExpected">Expected fee (KSh)</label><input type="number" id="stuExpected" min="0" step="50" value="10000" required></div>' +
+          '<button type="submit" class="btn btn-green btn-sm">Add student</button>' +
+        '</form>' +
+        '<div class="error-note" id="studentFormError" style="display:none; margin-bottom:12px;"></div>' +
+        '<table class="data-table"><thead><tr><th>Name</th><th>Class</th><th>Admission no.</th><th>Expected</th><th>Paid</th><th>Balance</th></tr></thead>' +
+          '<tbody id="studentTableBody"><tr><td colspan="6">Loading…</td></tr></tbody></table>' +
+      '</div>' +
+
+      '<div class="tabpanel" id="panel-payments" role="tabpanel" aria-labelledby="tab-payments" tabindex="0" hidden>' +
+        '<p style="color:var(--muted); font-size:0.88rem; margin-top:0;">Payments received on your designated Paybill/Till appear here. Confirm any that arrive without a recognised admission number.</p>' +
+        '<table class="data-table"><thead><tr><th>Reference</th><th>Payer</th><th>Amount</th><th>Status</th><th></th></tr></thead>' +
+          '<tbody id="paymentsTableBody"><tr><td colspan="5">Loading…</td></tr></tbody></table>' +
+        '<div class="error-note" id="reconcileError" style="display:none; margin-top:12px;"></div>' +
+      '</div>' +
+
+      '<div class="tabpanel" id="panel-reports" role="tabpanel" aria-labelledby="tab-reports" tabindex="0" hidden>' +
+        '<div class="report-row"><span>Daily collection report</span><button class="btn btn-ghost btn-sm report-btn" data-report-type="daily-collection">Generate</button></div>' +
+        '<div class="report-row"><span>Term collection report</span><button class="btn btn-ghost btn-sm report-btn" data-report-type="term-collection">Generate</button></div>' +
+        '<div class="report-row"><span>Outstanding fees report</span><button class="btn btn-ghost btn-sm report-btn" data-report-type="outstanding-fees">Generate</button></div>' +
+        '<div class="report-row"><span>Unmatched payment report</span><button class="btn btn-ghost btn-sm report-btn" data-report-type="unmatched-payments">Generate</button></div>' +
+        '<div class="report-preview" id="reportPreview" aria-live="polite"></div>' +
+      '</div>' +
+
+      '<div class="tabpanel" id="panel-reminders" role="tabpanel" aria-labelledby="tab-reminders" tabindex="0" hidden>' +
+        '<div id="remindersList"><div class="reminder-row"><div><strong>Loading reminders…</strong></div></div></div>' +
+      '</div>' +
+    '</div>'
+    );
+  }
+
+  function bindTabs(root){
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+    function select(tab){
+      tabs.forEach(function(t){
+        var selected = t === tab;
+        t.setAttribute('aria-selected', selected ? 'true' : 'false');
+        t.tabIndex = selected ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        panel.hidden = !selected;
+      });
+      tab.focus();
+    }
+    tabs.forEach(function(tab, i){
+      tab.addEventListener('click', function(){ select(tab); });
+      tab.addEventListener('keydown', function(e){
+        var next;
+        if(e.key === 'ArrowRight') next = tabs[(i+1) % tabs.length];
+        else if(e.key === 'ArrowLeft') next = tabs[(i-1+tabs.length) % tabs.length];
+        else if(e.key === 'Home') next = tabs[0];
+        else if(e.key === 'End') next = tabs[tabs.length-1];
+        if(next){ e.preventDefault(); select(next); }
+      });
+    });
+  }
+
+  function showLogin(message){
+    adminArea.innerHTML = LOGIN_TEMPLATE;
+    var form = document.getElementById('loginForm');
+    var errorBox = document.getElementById('loginError');
+    if(message){ errorBox.textContent = message; errorBox.style.display = 'block'; }
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      var email = document.getElementById('loginEmail').value.trim();
+      var password = document.getElementById('loginPassword').value;
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      api('/auth/login', { method:'POST', body: JSON.stringify({ email:email, password:password }) })
+        .then(function(res){
+          setToken(res.token);
+          setSession(res.school.id, res.school.name, res.user.name);
+          showDashboard(res.school.id, res.school.name, res.user.name);
+        })
+        .catch(function(err){
+          errorBox.textContent = err.message;
+          errorBox.style.display = 'block';
+          submitBtn.disabled = false;
+        });
+    });
+  }
+
+  function showDashboard(schoolId, schoolName, adminName){
+    currentAdminSchoolId = schoolId;
+    adminArea.innerHTML = dashboardTemplate(schoolName, adminName);
+    bindTabs(adminArea);
+    document.getElementById('logoutBtn').addEventListener('click', function(){
+      setToken(null);
+      setSession(null, null, null);
+      currentAdminSchoolId = null;
+      showLogin();
+    });
+    loadDashboard();
+    loadStudents();
+    loadPayments();
+    loadReminders();
+    bindStudentForm();
+    bindReportButtons();
+  }
+
+  function bootAdminArea(){
+    var token = getToken();
+    if(!token){ showLogin(); return; }
+    var session = getSession();
+    if(!session.schoolId){ showLogin(); return; }
+    // Verify the stored token still works before showing the dashboard.
+    fetch(API_BASE_URL + '/schools/' + session.schoolId + '/dashboard', { headers: { Authorization: 'Bearer ' + token } })
+      .then(function(res){
+        if(!res.ok){ setToken(null); setSession(null, null, null); showLogin(); return; }
+        showDashboard(session.schoolId, session.schoolName, session.adminName);
+      })
+      .catch(function(){ showLogin("We couldn't reach the ElimuPay service. Check your connection and try again."); });
+  }
+
+  /* -------------------- Overview / dashboard -------------------- */
+  function loadDashboard(){
+    api('/schools/' + currentAdminSchoolId + '/dashboard', null, true).then(renderDashboard).catch(function(err){
+      var box = document.getElementById('overviewError');
+      if(box){ box.textContent = err.message; box.style.display = 'block'; }
+    });
+  }
+  function renderDashboard(d){
+    document.getElementById('statExpected').textContent = fmtKsh(d.expected);
+    document.getElementById('statCollected').textContent = fmtKsh(d.collected);
+    document.getElementById('statOutstanding').textContent = fmtKsh(d.outstanding);
+    document.getElementById('statToday').textContent = fmtKsh(d.todaysCollection);
+
+    var total = (d.feeStatus.fullyPaid + d.feeStatus.partial + d.feeStatus.outstanding) || 1;
+    document.getElementById('feeStatusHeading').textContent = 'Fee status across ' + total + ' students';
+    setStatus('fillFullyPaid', 'valFullyPaid', d.feeStatus.fullyPaid, total);
+    setStatus('fillPartial', 'valPartial', d.feeStatus.partial, total);
+    setStatus('fillOutstanding', 'valOutstanding', d.feeStatus.outstanding, total);
+
+    var body = document.getElementById('recentPaymentsBody');
+    if(!d.recentPayments || !d.recentPayments.length){
+      body.innerHTML = '<tr><td colspan="2">No payments yet.</td></tr>';
+    } else {
+      body.innerHTML = d.recentPayments.map(function(p){
+        return '<tr><td>'+escapeHtml(p.student)+(p.className ? ' — '+escapeHtml(p.className) : '')+'</td><td class="num">'+fmtKsh(p.amount)+'</td></tr>';
+      }).join('');
+    }
+  }
+  function setStatus(fillId, valId, value, total){
+    document.getElementById(fillId).style.width = Math.round((value/total)*100) + '%';
+    document.getElementById(valId).textContent = value;
+  }
+
+  /* -------------------------- Students -------------------------- */
+  function loadStudents(){
+    api('/schools/' + currentAdminSchoolId + '/students', null, true).then(renderStudents).catch(function(err){
+      document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="6">Could not load students: '+escapeHtml(err.message)+'</td></tr>';
+    });
+  }
+  function renderStudents(rows){
+    var tbody = document.getElementById('studentTableBody');
+    if(!tbody) return;
+    if(!rows.length){ tbody.innerHTML = '<tr><td colspan="6">No students uploaded yet.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(s){
+      return '<tr><td>'+escapeHtml(s.name)+'</td><td>'+escapeHtml(s.className)+'</td><td>'+escapeHtml(s.admissionNo)+
+        '</td><td class="num">'+fmtKsh(s.expected)+'</td><td class="num">'+fmtKsh(s.paid)+'</td><td class="num">'+fmtKsh(s.balance)+'</td></tr>';
+    }).join('');
+  }
+  function bindStudentForm(){
+    var form = document.getElementById('addStudentForm');
+    var errorBox = document.getElementById('studentFormError');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      var payload = {
+        name: document.getElementById('stuName').value.trim(),
+        className: document.getElementById('stuClass').value.trim(),
+        admissionNo: document.getElementById('stuAdm').value.trim(),
+        parentPhone: document.getElementById('stuPhone').value.trim(),
+        expected: parseFloat(document.getElementById('stuExpected').value) || 0
+      };
+      if(!payload.name || !payload.className || !payload.admissionNo) return;
+
+      api('/schools/' + currentAdminSchoolId + '/students', { method:'POST', body: JSON.stringify(payload) }, true)
+        .then(function(){
+          loadStudents();
+          loadDashboard();
+          form.reset();
+          document.getElementById('stuExpected').value = 10000;
+        })
+        .catch(function(err){
+          errorBox.textContent = err.message;
+          errorBox.style.display = 'block';
+        });
+    });
+  }
+
+  /* -------------------------- Payments --------------------------- */
+  function loadPayments(){
+    api('/schools/' + currentAdminSchoolId + '/payments', null, true).then(renderPayments).catch(function(err){
+      document.getElementById('paymentsTableBody').innerHTML = '<tr><td colspan="5">Could not load payments: '+escapeHtml(err.message)+'</td></tr>';
+    });
+  }
+  function renderPayments(rows){
+    var tbody = document.getElementById('paymentsTableBody');
+    if(!tbody) return;
+    if(!rows.length){ tbody.innerHTML = '<tr><td colspan="5">No payments recorded yet.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(p){
+      var payer = p.status === 'matched' ? p.accountReference : (p.payerPhone || p.accountReference || 'Unknown');
+      var tag = p.status === 'matched' ? '<span class="tag tag-matched">Matched</span>' : '<span class="tag tag-unmatched">Unmatched</span>';
+      var action = p.status === 'matched' ? '' : '<button class="btn btn-ghost btn-sm review-btn" data-payment-id="'+p.id+'">Confirm student</button>';
+      return '<tr><td>'+escapeHtml(p.reference)+'</td><td>'+escapeHtml(payer||'Unknown')+'</td><td class="num">'+fmtKsh(p.amount)+'</td><td>'+tag+'</td><td>'+action+'</td></tr>';
+    }).join('');
+    tbody.querySelectorAll('.review-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ openReconcilePrompt(btn); });
+    });
+  }
+  function openReconcilePrompt(btn){
+    var errorBox = document.getElementById('reconcileError');
+    errorBox.style.display = 'none';
+    api('/schools/' + currentAdminSchoolId + '/students', null, true).then(function(list){
+      var names = list.map(function(s, i){ return (i+1) + '. ' + s.name + ' (' + s.admissionNo + ')'; }).join('\n');
+      var choice = window.prompt('This payment did not match an admission number automatically.\nWhich student does it belong to?\n' + names + '\n\nEnter a number:');
+      var idx = parseInt(choice, 10) - 1;
+      if(isNaN(idx) || !list[idx]) return;
+      var paymentId = btn.getAttribute('data-payment-id');
+      api('/schools/' + currentAdminSchoolId + '/payments/' + paymentId + '/reconcile', {
+        method: 'POST', body: JSON.stringify({ studentId: list[idx].id })
+      }, true).then(function(){
+        loadPayments(); loadDashboard(); loadStudents();
+      }).catch(function(err){
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+      });
+    }).catch(function(err){
+      errorBox.textContent = err.message;
+      errorBox.style.display = 'block';
+    });
+  }
+
+  /* --------------------------- Reports ---------------------------- */
+  function bindReportButtons(){
+    var preview = document.getElementById('reportPreview');
+    document.querySelectorAll('.report-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var type = btn.getAttribute('data-report-type');
+        preview.textContent = 'Generating…';
+        preview.classList.add('show');
+        api('/schools/' + currentAdminSchoolId + '/reports/' + type, null, true).then(function(r){
+          preview.textContent = r.summary;
+        }).catch(function(err){
+          preview.textContent = 'Could not generate this report: ' + err.message;
+        });
+      });
+    });
+  }
+
+  /* -------------------------- Reminders ---------------------------- */
+  function loadReminders(){
+    api('/schools/' + currentAdminSchoolId + '/reminders', null, true).then(renderReminders).catch(function(err){
+      var list = document.getElementById('remindersList');
+      if(list) list.innerHTML = '<div class="error-note">Could not load reminders: '+escapeHtml(err.message)+'</div>';
+    });
+  }
+  function renderReminders(rows){
+    var list = document.getElementById('remindersList');
+    if(!list) return;
+    list.innerHTML = rows.map(function(r){
+      return '<div class="reminder-row"><div><strong>'+escapeHtml(r.label)+'</strong><p>'+escapeHtml(r.description)+'</p></div>'+
+        '<label class="switch"><input type="checkbox" data-reminder-id="'+r.id+'" '+(r.enabled?'checked':'')+'><span class="slider" aria-hidden="true"></span></label></div>';
+    }).join('');
+    list.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        api('/schools/' + currentAdminSchoolId + '/reminders/' + cb.getAttribute('data-reminder-id'), {
+          method: 'PATCH', body: JSON.stringify({ enabled: cb.checked })
+        }, true).catch(function(){ cb.checked = !cb.checked; });
+      });
+    });
+  }
+
+  /* -------------------- Request-access lead form -------------------- */
+  (function(){
+    var form = document.getElementById('leadForm');
+    var success = document.getElementById('leadSuccess');
+    var errorBox = document.getElementById('leadError');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      success.style.display = 'none';
+      errorBox.style.display = 'none';
+      var payload = {
+        name: document.getElementById('leadName').value.trim(),
+        schoolName: document.getElementById('leadSchool').value.trim(),
+        phone: document.getElementById('leadPhone').value.trim(),
+        studentCount: document.getElementById('leadStudents').value,
+        email: document.getElementById('leadEmail').value.trim(),
+        message: document.getElementById('leadMessage').value.trim()
+      };
+      if(!payload.name || !payload.schoolName || !payload.phone) return;
+
+      api('/leads', { method:'POST', body: JSON.stringify(payload) }).then(function(res){
+        success.textContent = res.message;
+        success.style.display = 'block';
+        form.reset();
+      }).catch(function(err){
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+      });
+    });
+  })();
+
+  /* ------------------------- Parent portal -------------------------- */
+  (function(){
+    var schoolStep = document.getElementById('schoolPickerStep');
+    var childStep = document.getElementById('childSearchStep');
+    var schoolSearchInput = document.getElementById('schoolSearchInput');
+    var schoolSearchBtn = document.getElementById('schoolSearchBtn');
+    var schoolResults = document.getElementById('schoolPickerResults');
+    var chosenSchoolName = document.getElementById('chosenSchoolName');
+    var changeSchoolBtn = document.getElementById('changeSchoolBtn');
+    var childName = document.getElementById('childName');
+    var childClass = document.getElementById('childClass');
+    var childAdmission = document.getElementById('childAdmission');
+    var childSearchBtn = document.getElementById('childSearchBtn');
+    var result = document.getElementById('portalResult');
+
+    function searchSchools(q){
+      schoolResults.innerHTML = '<p style="color:var(--muted);">Searching…</p>';
+      api('/schools/search?q=' + encodeURIComponent(q))
+        .then(function(rows){
+          if(!rows.length){
+            schoolResults.innerHTML = '<div class="error-note" role="alert">No school matched "'+escapeHtml(q)+'". Check the spelling, or ask your school\'s office for their exact registered name.</div>';
+            return;
+          }
+          schoolResults.innerHTML = '<div class="school-picker-results">' + rows.map(function(s){
+            return '<button type="button" data-school-id="'+s.id+'" data-school-name="'+escapeHtml(s.name)+'">'+escapeHtml(s.name)+(s.county ? ' — '+escapeHtml(s.county) : '')+'</button>';
+          }).join('') + '</div>';
+          schoolResults.querySelectorAll('button').forEach(function(b){
+            b.addEventListener('click', function(){ chooseSchool(b.getAttribute('data-school-id'), b.getAttribute('data-school-name')); });
+          });
+        })
+        .catch(function(err){
+          schoolResults.innerHTML = '<div class="error-note" role="alert">' + escapeHtml(err.message) + '</div>';
+        });
+    }
+
+    function chooseSchool(schoolId, schoolName){
+      currentParentSchoolId = schoolId;
+      chosenSchoolName.textContent = schoolName;
+      schoolStep.style.display = 'none';
+      childStep.style.display = 'block';
+      result.innerHTML = '';
+      childName.value = ''; childClass.value = ''; childAdmission.value = '';
+      childName.focus();
+    }
+
+    changeSchoolBtn.addEventListener('click', function(){
+      currentParentSchoolId = null;
+      childStep.style.display = 'none';
+      schoolStep.style.display = 'block';
+      result.innerHTML = '';
+      schoolResults.innerHTML = '';
+      schoolSearchInput.value = '';
+      schoolSearchInput.focus();
+    });
+
+    schoolSearchBtn.addEventListener('click', function(){
+      var q = schoolSearchInput.value.trim();
+      if(!q) return;
+      searchSchools(q);
+    });
+    schoolSearchInput.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); schoolSearchBtn.click(); }
+    });
+
+    function loadExact(admissionNo){
+      result.innerHTML = '<p style="color:var(--muted);">Checking…</p>';
+      api('/schools/' + currentParentSchoolId + '/students/' + encodeURIComponent(admissionNo))
+        .then(function(data){ renderStudentCard(data.student, data.history, admissionNo); })
+        .catch(function(err){
+          result.innerHTML = '<div class="error-note" role="alert">' + escapeHtml(err.message) + '</div>';
+        });
+    }
+
+    childSearchBtn.addEventListener('click', function(){
+      var name = childName.value.trim();
+      var cls = childClass.value.trim();
+      var adm = childAdmission.value.trim();
+
+      if(adm){ loadExact(adm); return; }
+      if(!name){
+        result.innerHTML = '<div class="error-note" role="alert">Enter your child\'s name, or their admission number, to search.</div>';
+        return;
+      }
+
+      result.innerHTML = '<p style="color:var(--muted);">Searching…</p>';
+      var qs = 'name=' + encodeURIComponent(name) + (cls ? '&className=' + encodeURIComponent(cls) : '');
+      api('/schools/' + currentParentSchoolId + '/students/search?' + qs)
+        .then(function(rows){
+          if(!rows.length){
+            result.innerHTML = '<div class="error-note" role="alert">No student matched that name'+(cls?' in '+escapeHtml(cls):'')+'. Check the spelling, try just the first name, or ask the school office for the admission number.</div>';
+            return;
+          }
+          if(rows.length === 1){
+            loadExact(rows[0].admissionNo);
+            return;
+          }
+          result.innerHTML = '<p style="color:var(--muted); margin-bottom:4px;">'+rows.length+' students matched — select the right one:</p>' +
+            '<div class="search-results-list">' + rows.map(function(r){
+              return '<button type="button" data-adm="'+escapeHtml(r.admissionNo)+'"><span>'+escapeHtml(r.name)+' — '+escapeHtml(r.className)+'</span><span class="adm">'+escapeHtml(r.admissionNo)+'</span></button>';
+            }).join('') + '</div>';
+          result.querySelectorAll('.search-results-list button').forEach(function(b){
+            b.addEventListener('click', function(){ loadExact(b.getAttribute('data-adm')); });
+          });
+        })
+        .catch(function(err){
+          result.innerHTML = '<div class="error-note" role="alert">' + escapeHtml(err.message) + '</div>';
+        });
+    });
+    [childName, childClass, childAdmission].forEach(function(el){
+      el.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); childSearchBtn.click(); } });
+    });
+
+    function renderStudentCard(s, history, key){
+      var historyRows = (history||[]).map(function(h){
+        return '<tr><td>Payment received</td><td class="num">'+fmtKsh(h.amount)+'</td></tr>';
+      }).join('') || '<tr><td colspan="2">No payments recorded yet.</td></tr>';
+
+      result.innerHTML =
+        '<div class="student-card">'+
+          '<div class="student-card-head"><h4>'+escapeHtml(s.name)+'</h4><span>'+escapeHtml(s.className)+' · '+escapeHtml(key)+'</span></div>'+
+          '<div class="student-body">'+
+            '<div class="student-figures">'+
+              '<div><div class="lab">Expected</div><div class="val">'+fmtKsh(s.expected)+'</div></div>'+
+              '<div><div class="lab">Paid</div><div class="val">'+fmtKsh(s.paid)+'</div></div>'+
+              '<div><div class="lab">Balance</div><div class="val '+(s.balance>0?'owe':'')+'">'+fmtKsh(s.balance)+'</div></div>'+
+            '</div>'+
+            '<div class="history-title">Payment history</div>'+
+            '<table class="data-table"><tbody>'+historyRows+'</tbody></table>'+
+            (s.balance > 0 ? '<button type="button" class="btn btn-red" style="margin-top:16px;" id="payNowBtn" data-admission="'+escapeHtml(key)+'" data-name="'+escapeHtml(s.name)+'" data-balance="'+s.balance+'">Pay balance via M-Pesa</button>' : '<p style="margin-top:16px; color:var(--green-deep); font-weight:600;">Fully paid for this term.</p>')+
+          '</div>'+
+        '</div>';
+
+      var payBtn = document.getElementById('payNowBtn');
+      if(payBtn){
+        payBtn.addEventListener('click', function(){
+          openPayModal(payBtn.getAttribute('data-admission'), payBtn.getAttribute('data-name'), parseFloat(payBtn.getAttribute('data-balance')));
+        });
+      }
+    }
+  })();
+
+  /* --------------------------- Pay modal ----------------------------- */
+  var openPayModal, closePayModal;
+  (function(){
+    var overlay = document.getElementById('payModal');
+    var sub = document.getElementById('payModalSub');
+    var amount = document.getElementById('payAmount');
+    var phone = document.getElementById('payPhone');
+    var status = document.getElementById('payStatus');
+    var confirmBtn = document.getElementById('payConfirm');
+    var cancelBtn = document.getElementById('payCancel');
+    var lastFocused = null;
+    var currentAdmission = null;
+
+    openPayModal = function(admissionNo, name, balance){
+      currentAdmission = admissionNo;
+      lastFocused = document.activeElement;
+      sub.textContent = 'Paying the balance of ' + name + '.';
+      amount.value = balance;
+      phone.value = '';
+      status.classList.remove('show');
+      status.textContent = '';
+      confirmBtn.disabled = false;
+      overlay.classList.add('open');
+      phone.focus();
+      document.addEventListener('keydown', onKeydown);
+    };
+    closePayModal = function(){
+      overlay.classList.remove('open');
+      document.removeEventListener('keydown', onKeydown);
+      if(lastFocused) lastFocused.focus();
+    };
+    function onKeydown(e){ if(e.key === 'Escape') closePayModal(); }
+
+    cancelBtn.addEventListener('click', closePayModal);
+    overlay.addEventListener('click', function(e){ if(e.target === overlay) closePayModal(); });
+
+    confirmBtn.addEventListener('click', function(){
+      if(!phone.value.trim()){
+        status.textContent = 'Enter a phone number to continue.';
+        status.classList.add('show');
+        phone.focus();
+        return;
+      }
+      confirmBtn.disabled = true;
+      status.textContent = 'Sending payment request…';
+      status.classList.add('show');
+
+      api('/mpesa/stk-push', {
+        method: 'POST',
+        body: JSON.stringify({ schoolId: currentParentSchoolId, admissionNo: currentAdmission, phone: phone.value.trim(), amount: parseFloat(amount.value) || 0 })
+      }).then(function(res){
+        status.textContent = res.message;
+        confirmBtn.disabled = false;
+      }).catch(function(err){
+        status.textContent = err.message;
+        confirmBtn.disabled = false;
+      });
+    });
+  })();
+
+  /* ====================================================================
+     Platform admin (superadmin)
+     ==================================================================== */
+  var superAdminArea = document.getElementById('superAdminArea');
+
+  function apiSuper(path, options){
+    var token = null;
+    try{ token = localStorage.getItem(SUPER_TOKEN_KEY); }catch(e){}
+    var headers = { 'Content-Type': 'application/json' };
+    if(token) headers['Authorization'] = 'Bearer ' + token;
+    return fetch(API_BASE_URL + path, Object.assign({ headers: headers }, options))
+      .then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(body){
+          if(!res.ok){
+            if(res.status === 401){
+              try{ localStorage.removeItem(SUPER_TOKEN_KEY); }catch(e){}
+              showSuperLogin('Your session has expired. Please sign in again.');
+            }
+            var err = new Error(body.error || ('Request failed (' + res.status + ')'));
+            err.status = res.status;
+            throw err;
+          }
+          return body;
+        });
+      })
+      .catch(function(err){
+        if(err.status) throw err;
+        var networkErr = new Error("We couldn't reach the ElimuPay service. Check your connection and try again.");
+        networkErr.status = 0;
+        throw networkErr;
+      });
+  }
+
+  var SUPER_LOGIN_TEMPLATE =
+    '<div class="login-card">' +
+      '<h3>Platform administrator sign in</h3>' +
+      '<p class="hint">For the ElimuPay team only.</p>' +
+      '<form id="superLoginForm">' +
+        '<div class="form-row"><label for="superLoginEmail">Email</label><input type="email" id="superLoginEmail" required autocomplete="username"></div>' +
+        '<div class="form-row"><label for="superLoginPassword">Password</label><input type="password" id="superLoginPassword" required autocomplete="current-password"></div>' +
+        '<div class="error-note" id="superLoginError" style="display:none; margin-bottom:14px;"></div>' +
+        '<button type="submit" class="btn btn-red btn-block">Sign in</button>' +
+      '</form>' +
+    '</div>';
+
+  function superDashboardTemplate(adminName){
+    return (
+    '<div class="session-bar">' +
+      '<span>Signed in as <strong>' + escapeHtml(adminName) + '</strong> — platform administrator</span>' +
+      '<button type="button" class="btn btn-ghost btn-sm" id="superLogoutBtn">Sign out</button>' +
+    '</div>' +
+    '<div class="dash-shell" style="border-top:none;">' +
+      '<div class="super-tablist" role="tablist" aria-label="Platform admin sections">' +
+        '<button role="tab" id="sa-tab-overview" aria-controls="sa-panel-overview" aria-selected="true">Overview</button>' +
+        '<button role="tab" id="sa-tab-schools" aria-controls="sa-panel-schools" aria-selected="false" tabindex="-1">Schools</button>' +
+        '<button role="tab" id="sa-tab-leads" aria-controls="sa-panel-leads" aria-selected="false" tabindex="-1">Leads</button>' +
+        '<button role="tab" id="sa-tab-version" aria-controls="sa-panel-version" aria-selected="false" tabindex="-1">Version &amp; maintenance</button>' +
+      '</div>' +
+
+      '<div class="tabpanel" id="sa-panel-overview" role="tabpanel" aria-labelledby="sa-tab-overview" tabindex="0">' +
+        '<div class="stat-cards" style="grid-template-columns:repeat(4,1fr);">' +
+          '<div class="stat-card"><div class="stat-label">Schools (active / suspended)</div><div class="stat-value" id="saStatSchools">—</div></div>' +
+          '<div class="stat-card"><div class="stat-label">Students, all schools</div><div class="stat-value" id="saStatStudents">—</div></div>' +
+          '<div class="stat-card"><div class="stat-label">Collected, all schools</div><div class="stat-value" id="saStatCollected">—</div></div>' +
+          '<div class="stat-card"><div class="stat-label">New access requests</div><div class="stat-value" id="saStatLeads">—</div></div>' +
+        '</div>' +
+        '<div class="error-note" id="saOverviewError" style="display:none;"></div>' +
+      '</div>' +
+
+      '<div class="tabpanel" id="sa-panel-schools" role="tabpanel" aria-labelledby="sa-tab-schools" tabindex="0" hidden>' +
+        '<form class="add-school-form" id="addSchoolForm">' +
+          '<h4 style="font-size:0.95rem; margin-bottom:14px;">Onboard a new school</h4>' +
+          '<div class="grid">' +
+            '<div><label for="saSchoolName">School name</label><input type="text" id="saSchoolName" required></div>' +
+            '<div><label for="saSchoolCounty">County</label><input type="text" id="saSchoolCounty"></div>' +
+            '<div><label for="saSchoolPaybill">M-Pesa Paybill/Till</label><input type="text" id="saSchoolPaybill"></div>' +
+            '<div><label for="saSchoolPlan">Plan</label><select id="saSchoolPlan"><option>Starter</option><option>School</option><option>Plus</option><option>Enterprise</option></select></div>' +
+            '<div><label for="saAdminName">Admin\'s name</label><input type="text" id="saAdminName" required></div>' +
+            '<div><label for="saAdminEmail">Admin\'s email</label><input type="email" id="saAdminEmail" required></div>' +
+          '</div>' +
+          '<button type="submit" class="btn btn-green btn-sm">Create school &amp; admin account</button>' +
+          '<div class="error-note" id="addSchoolError" style="display:none; margin-top:14px;"></div>' +
+          '<div class="credential-box" id="addSchoolCredentials" style="display:none;"></div>' +
+        '</form>' +
+        '<table class="data-table"><thead><tr><th>School</th><th>Plan</th><th>Status</th><th>Students</th><th>Collected</th><th>Outstanding</th><th></th></tr></thead>' +
+          '<tbody id="saSchoolsBody"><tr><td colspan="7">Loading…</td></tr></tbody></table>' +
+        '<div class="error-note" id="saSchoolsError" style="display:none; margin-top:12px;"></div>' +
+      '</div>' +
+
+      '<div class="tabpanel" id="sa-panel-leads" role="tabpanel" aria-labelledby="sa-tab-leads" tabindex="0" hidden>' +
+        '<table class="data-table"><thead><tr><th>Contact</th><th>School</th><th>Phone</th><th>Size</th><th>Status</th><th></th></tr></thead>' +
+          '<tbody id="saLeadsBody"><tr><td colspan="6">Loading…</td></tr></tbody></table>' +
+      '</div>' +
+
+      '<div class="tabpanel" id="sa-panel-version" role="tabpanel" aria-labelledby="sa-tab-version" tabindex="0" hidden>' +
+        '<div class="reminder-row">' +
+          '<div><strong>Maintenance mode</strong><p>While on, school administrators cannot sign in. Parent lookups and payments keep working.</p></div>' +
+          '<label class="switch"><input type="checkbox" id="maintenanceToggle"><span class="slider" aria-hidden="true"></span></label>' +
+        '</div>' +
+        '<form class="add-school-form" id="addVersionForm" style="margin-top:20px;">' +
+          '<h4 style="font-size:0.95rem; margin-bottom:14px;">Publish a new version note</h4>' +
+          '<div class="grid">' +
+            '<div><label for="saVersionNumber">Version</label><input type="text" id="saVersionNumber" placeholder="e.g. 1.2.0" required></div>' +
+            '<div><label for="saVersionNotes">Notes</label><input type="text" id="saVersionNotes" placeholder="What changed"></div>' +
+          '</div>' +
+          '<button type="submit" class="btn btn-green btn-sm">Publish version note</button>' +
+          '<div class="error-note" id="addVersionError" style="display:none; margin-top:14px;"></div>' +
+        '</form>' +
+        '<div id="versionHistory" style="margin-top:20px;"><p style="color:var(--muted);">Loading…</p></div>' +
+        '<p class="form-note" style="color:var(--muted); font-size:0.82rem; margin-top:16px;">Publishing a note here does not deploy code by itself — it records what changed and updates the version shown publicly. Deploying the actual update is still a separate step outside this dashboard.</p>' +
+      '</div>' +
+    '</div>'
+    );
+  }
+
+  function showSuperLogin(message){
+    superAdminArea.innerHTML = SUPER_LOGIN_TEMPLATE;
+    var form = document.getElementById('superLoginForm');
+    var errorBox = document.getElementById('superLoginError');
+    if(message){ errorBox.textContent = message; errorBox.style.display = 'block'; }
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      var email = document.getElementById('superLoginEmail').value.trim();
+      var password = document.getElementById('superLoginPassword').value;
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      api('/auth/login', { method:'POST', body: JSON.stringify({ email:email, password:password }) })
+        .then(function(res){
+          if(res.user.role !== 'superadmin'){
+            errorBox.textContent = 'This account does not have platform administrator access.';
+            errorBox.style.display = 'block';
+            submitBtn.disabled = false;
+            return;
+          }
+          try{ localStorage.setItem(SUPER_TOKEN_KEY, res.token); }catch(err){}
+          try{ localStorage.setItem('elimupay_super_name', res.user.name); }catch(err){}
+          showSuperDashboard(res.user.name);
+        })
+        .catch(function(err){
+          errorBox.textContent = err.message;
+          errorBox.style.display = 'block';
+          submitBtn.disabled = false;
+        });
+    });
+  }
+
+  function showSuperDashboard(adminName){
+    superAdminArea.innerHTML = superDashboardTemplate(adminName);
+    bindTabs(superAdminArea);
+    document.getElementById('superLogoutBtn').addEventListener('click', function(){
+      try{ localStorage.removeItem(SUPER_TOKEN_KEY); localStorage.removeItem('elimupay_super_name'); }catch(e){}
+      showSuperLogin();
+    });
+    loadSuperOverview();
+    loadSuperSchools();
+    loadSuperLeads();
+    loadSuperVersion();
+    bindAddSchoolForm();
+    bindAddVersionForm();
+    bindMaintenanceToggle();
+  }
+
+  function bootSuperAdminArea(){
+    var token = null;
+    try{ token = localStorage.getItem(SUPER_TOKEN_KEY); }catch(e){}
+    if(!token){ showSuperLogin(); return; }
+    fetch(API_BASE_URL + '/superadmin/overview', { headers: { Authorization: 'Bearer ' + token } })
+      .then(function(res){
+        if(!res.ok){
+          try{ localStorage.removeItem(SUPER_TOKEN_KEY); }catch(e){}
+          showSuperLogin();
+          return;
+        }
+        var name = 'Administrator';
+        try{ name = localStorage.getItem('elimupay_super_name') || name; }catch(e){}
+        showSuperDashboard(name);
+      })
+      .catch(function(){ showSuperLogin("We couldn't reach the ElimuPay service. Check your connection and try again."); });
+  }
+
+  /* ------------------------------ Overview ------------------------------ */
+  function loadSuperOverview(){
+    apiSuper('/superadmin/overview').then(function(d){
+      document.getElementById('saStatSchools').textContent = d.activeSchools + ' / ' + d.suspendedSchools;
+      document.getElementById('saStatStudents').textContent = d.totalStudents;
+      document.getElementById('saStatCollected').textContent = fmtKsh(d.totalCollected);
+      document.getElementById('saStatLeads').textContent = d.newLeads;
+    }).catch(function(err){
+      var box = document.getElementById('saOverviewError');
+      if(box){ box.textContent = err.message; box.style.display = 'block'; }
+    });
+  }
+
+  /* ------------------------------- Schools ------------------------------- */
+  function loadSuperSchools(){
+    apiSuper('/superadmin/schools').then(renderSuperSchools).catch(function(err){
+      var body = document.getElementById('saSchoolsBody');
+      if(body) body.innerHTML = '<tr><td colspan="7">Could not load schools: '+escapeHtml(err.message)+'</td></tr>';
+    });
+  }
+  function renderSuperSchools(rows){
+    var body = document.getElementById('saSchoolsBody');
+    if(!body) return;
+    if(!rows.length){ body.innerHTML = '<tr><td colspan="7">No schools yet.</td></tr>'; return; }
+    body.innerHTML = rows.map(function(s){
+      var badge = s.status === 'active'
+        ? '<span class="badge badge-active">Active</span>'
+        : '<span class="badge badge-suspended">Suspended</span>';
+      var toggleLabel = s.status === 'active' ? 'Suspend' : 'Reactivate';
+      return '<tr>' +
+        '<td>'+escapeHtml(s.name)+(s.county?' <span style="color:var(--muted);">— '+escapeHtml(s.county)+'</span>':'')+'</td>' +
+        '<td>'+escapeHtml(s.plan||'')+'</td>' +
+        '<td>'+badge+'</td>' +
+        '<td class="num">'+s.totalStudents+'</td>' +
+        '<td class="num">'+fmtKsh(s.collected)+'</td>' +
+        '<td class="num">'+fmtKsh(s.outstanding)+'</td>' +
+        '<td><div class="school-row-actions">' +
+          '<button class="btn btn-ghost btn-sm toggle-status-btn" data-id="'+s.id+'" data-status="'+s.status+'">'+toggleLabel+'</button>' +
+          '<button class="btn btn-red btn-sm delete-school-btn" data-id="'+s.id+'" data-name="'+escapeHtml(s.name)+'">Delete</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+
+    body.querySelectorAll('.toggle-status-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var newStatus = btn.getAttribute('data-status') === 'active' ? 'suspended' : 'active';
+        apiSuper('/superadmin/schools/' + btn.getAttribute('data-id'), {
+          method:'PATCH', body: JSON.stringify({ status: newStatus })
+        }).then(function(){ loadSuperSchools(); loadSuperOverview(); }).catch(function(err){
+          var box = document.getElementById('saSchoolsError');
+          box.textContent = err.message; box.style.display = 'block';
+        });
+      });
+    });
+    body.querySelectorAll('.delete-school-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var name = btn.getAttribute('data-name');
+        if(!window.confirm('Permanently delete "' + name + '" and all of its students, payments and admin accounts? This cannot be undone.')) return;
+        apiSuper('/superadmin/schools/' + btn.getAttribute('data-id'), { method:'DELETE' })
+          .then(function(){ loadSuperSchools(); loadSuperOverview(); })
+          .catch(function(err){
+            var box = document.getElementById('saSchoolsError');
+            box.textContent = err.message; box.style.display = 'block';
+          });
+      });
+    });
+  }
+
+  function bindAddSchoolForm(){
+    var form = document.getElementById('addSchoolForm');
+    var errorBox = document.getElementById('addSchoolError');
+    var credBox = document.getElementById('addSchoolCredentials');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      credBox.style.display = 'none';
+      var payload = {
+        name: document.getElementById('saSchoolName').value.trim(),
+        county: document.getElementById('saSchoolCounty').value.trim(),
+        paybillNumber: document.getElementById('saSchoolPaybill').value.trim(),
+        plan: document.getElementById('saSchoolPlan').value,
+        adminName: document.getElementById('saAdminName').value.trim(),
+        adminEmail: document.getElementById('saAdminEmail').value.trim()
+      };
+      if(!payload.name || !payload.adminName || !payload.adminEmail) return;
+
+      apiSuper('/superadmin/schools', { method:'POST', body: JSON.stringify(payload) })
+        .then(function(res){
+          credBox.innerHTML = 'Account created. Share these with the school — this password is shown only once:<br>' +
+            'Email: <code>'+escapeHtml(res.adminEmail)+'</code> &nbsp; Password: <code>'+escapeHtml(res.adminPassword)+'</code>';
+          credBox.style.display = 'block';
+          form.reset();
+          document.getElementById('saSchoolPlan').value = 'Starter';
+          loadSuperSchools();
+          loadSuperOverview();
+        })
+        .catch(function(err){
+          errorBox.textContent = err.message;
+          errorBox.style.display = 'block';
+        });
+    });
+  }
+
+  /* -------------------------------- Leads --------------------------------- */
+  function loadSuperLeads(){
+    apiSuper('/superadmin/leads').then(renderSuperLeads).catch(function(err){
+      var body = document.getElementById('saLeadsBody');
+      if(body) body.innerHTML = '<tr><td colspan="6">Could not load leads: '+escapeHtml(err.message)+'</td></tr>';
+    });
+  }
+  function renderSuperLeads(rows){
+    var body = document.getElementById('saLeadsBody');
+    if(!body) return;
+    if(!rows.length){ body.innerHTML = '<tr><td colspan="6">No access requests yet.</td></tr>'; return; }
+    body.innerHTML = rows.map(function(l){
+      return '<tr>' +
+        '<td>'+escapeHtml(l.name)+(l.email?' <span style="color:var(--muted);">— '+escapeHtml(l.email)+'</span>':'')+'</td>' +
+        '<td>'+escapeHtml(l.schoolName)+'</td>' +
+        '<td>'+escapeHtml(l.phone)+'</td>' +
+        '<td>'+escapeHtml(l.studentCount||'—')+'</td>' +
+        '<td>'+escapeHtml(l.status)+'</td>' +
+        '<td>' +
+          '<select class="lead-status-select" data-id="'+l.id+'" style="padding:6px 8px; border:1px solid var(--line); font-family:inherit; font-size:0.82rem;">' +
+            ['new','contacted','onboarded','declined'].map(function(s){
+              return '<option value="'+s+'"'+(s===l.status?' selected':'')+'>'+s+'</option>';
+            }).join('') +
+          '</select>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    body.querySelectorAll('.lead-status-select').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        apiSuper('/superadmin/leads/' + sel.getAttribute('data-id'), {
+          method:'PATCH', body: JSON.stringify({ status: sel.value })
+        }).catch(function(){ loadSuperLeads(); });
+      });
+    });
+  }
+
+  /* ------------------------------ Version --------------------------------- */
+  function loadSuperVersion(){
+    api('/version').then(function(info){
+      renderSuperVersion(info);
+      var toggle = document.getElementById('maintenanceToggle');
+      if(toggle) toggle.checked = !!info.maintenanceMode;
+    }).catch(function(err){
+      var box = document.getElementById('versionHistory');
+      if(box) box.innerHTML = '<div class="error-note">Could not load version history: '+escapeHtml(err.message)+'</div>';
+    });
+  }
+  function renderSuperVersion(info){
+    var box = document.getElementById('versionHistory');
+    if(!box) return;
+    if(!info.history || !info.history.length){
+      box.innerHTML = '<p style="color:var(--muted);">No version notes published yet.</p>';
+      return;
+    }
+    box.innerHTML = info.history.map(function(v){
+      var d = new Date(v.releasedAt);
+      return '<div class="version-row"><span class="v-num">'+escapeHtml(v.version)+'</span><span class="v-notes">'+escapeHtml(v.notes||'')+'</span><span class="v-date">'+d.toLocaleDateString()+'</span></div>';
+    }).join('');
+  }
+
+  function bindAddVersionForm(){
+    var form = document.getElementById('addVersionForm');
+    var errorBox = document.getElementById('addVersionError');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      var version = document.getElementById('saVersionNumber').value.trim();
+      var notes = document.getElementById('saVersionNotes').value.trim();
+      if(!version) return;
+      apiSuper('/superadmin/version', { method:'POST', body: JSON.stringify({ version:version, notes:notes }) })
+        .then(function(){
+          form.reset();
+          loadSuperVersion();
+        })
+        .catch(function(err){
+          errorBox.textContent = err.message;
+          errorBox.style.display = 'block';
+        });
+    });
+  }
+
+  function bindMaintenanceToggle(){
+    var toggle = document.getElementById('maintenanceToggle');
+    toggle.addEventListener('change', function(){
+      apiSuper('/superadmin/maintenance', { method:'PATCH', body: JSON.stringify({ enabled: toggle.checked }) })
+        .catch(function(err){
+          toggle.checked = !toggle.checked;
+          window.alert(err.message);
+        });
+    });
+  }
+
+  /* ------------------------------ Boot ------------------------------- */
+  bootAdminArea();
+  bootSuperAdminArea();
+</script>
+
+</body>
+</html>
