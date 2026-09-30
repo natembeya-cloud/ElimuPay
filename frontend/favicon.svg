@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">ElimuPay favicon</title>
+  <desc id="desc">A school finance icon with a green circle and white E</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0B7A43"/>
+      <stop offset="100%" stop-color="#045C32"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="60" fill="url(#bg)"/>
+  <circle cx="64" cy="64" r="52" fill="none" stroke="#D84D4A" stroke-width="8" opacity="0.95"/>
+  <path d="M41 34h38c7.7 0 14 6.3 14 14v1.5c0 7.7-6.3 14-14 14H57v8h26c7.7 0 14 6.3 14 14v1.5c0 7.7-6.3 14-14 14H41V34zm16 16h16c2.8 0 5-2.2 5-5v-1.5c0-2.8-2.2-5-5-5H57v11.5zm0 30.5h18.5c2.8 0 5-2.2 5-5v-1.5c0-2.8-2.2-5-5-5H57v11.5z" fill="#fff"/>
+  <path d="M28 90l14-52h12l-14 52H28z" fill="#F4C95D" opacity="0.9"/>
+</svg>
